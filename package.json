@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "start:dev": "nodemon server/index.js",
-    "start:es": "nodemon server/wsServer.js"
+    "start:ws": "nodemon server/wsServer.js"
   },
   "dependencies": {
     "antd": "^5.26.7",

@@ -22,11 +22,11 @@ function renderRoute(routes) {
 }
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <BrowserRouter>
-      <Routes>
-        {renderRoute(routes)}
-      </Routes>
-    </BrowserRouter>
-  </StrictMode>,
+  // <StrictMode>
+  <BrowserRouter>
+    <Routes>
+      {renderRoute(routes)}
+    </Routes>
+  </BrowserRouter>
+  // </StrictMode>,
 )

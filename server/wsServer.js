@@ -12,7 +12,7 @@ const wss = new WebSocketServer({ server });
 
 
 // 心跳检测间隔
-const HEARTBEAT_INTERVAL = 30000;
+const HEARTBEAT_INTERVAL = 10000;
 
 class WebSocketHandler {
     constructor() {
@@ -31,6 +31,8 @@ class WebSocketHandler {
             isAlive: true,
             lastHeartbeat: Date.now()
         });
+
+        console.log(35, this.clients)
 
         console.log(`Client connected: ${clientId}`);
 
@@ -53,7 +55,7 @@ class WebSocketHandler {
         return params.get('clientId') || Date.now().toString();
     }
 
-    // 设置心跳检测
+    // 设置心跳检测,server发给浏览器的ping-pong
     setupHeartbeat(ws, clientId) {
         ws.on('pong', () => {
             const client = this.clients.get(clientId);
@@ -77,7 +79,7 @@ class WebSocketHandler {
         });
     }
 
-    // 处理消息
+    // 处理消息，能收到客户端发来的ping
     async handleMessage(clientId, data) {
         const client = this.clients.get(clientId);
         if (!client) return;
@@ -85,7 +87,7 @@ class WebSocketHandler {
             case 'chat':
                 await this.handleChatMessage(clientId, data);
                 break;
-            case 'heartbeat':
+            case 'ping':
                 await this.handleHeartbeat(clientId);
                 break;
             default:
@@ -116,12 +118,21 @@ class WebSocketHandler {
         }
     }
 
+    async handleHeartbeat(clientId) {
+        this.broadcast({
+            type: 'pong',
+            senderId: clientId,
+            content: "我收到了你的ping",
+            timestamp: Date.now()
+        });
+    }
+
     // 设置关闭处理
     setupCloseHandler(ws, clientId) {
         ws.on('close', () => {
             console.log(`Client disconnected: ${clientId}`);
             this.clients.delete(clientId);
-            this.broadcastUserList();
+            // this.broadcastUserList();
         });
     }
     // 发送欢迎消息
@@ -161,7 +172,7 @@ class WebSocketHandler {
                     this.clients.delete(clientId);
                     return;
                 }
-
+                // 先将连接状态标记为false，然后发送ping请求给客户端，等待pong响应来更新isAlive状态
                 client.isAlive = false;
                 client.ws.ping();
             });

@@ -6,9 +6,8 @@ import './index.css'
 
 const Chat = () => {
     const [inputMessage, setInputMessage] = useState('');
-    const { isConnected, messages, sendMessage, error } = useWebSocket('ws://localhost:8080');
+    const { isConnected, messages, sendMessage, error } = useWebSocket('ws://192.168.31.112:8080');
 
-    audioUrl
 
     const handleSubmit = (e) => {
         e.preventDefault();
