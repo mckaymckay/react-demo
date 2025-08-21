@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { messageNotification } from '../utils/notifier'
 
 const Valid_message_type = ['chat', 'welcome', 'error', 'pong', 'force_disconnect'];
 
@@ -79,6 +80,7 @@ const useWebSocket = (url) => {
                 }
 
                 if (Valid_message_type.includes(content.type)) {
+                    messageNotification()
                     setMessages((prev) => [...prev, content]);
                 }
             } catch (err) {
