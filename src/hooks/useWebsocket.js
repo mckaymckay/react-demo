@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 
-const Valid_message_type = ['chat', 'welcome', 'error', 'pong'];
+const Valid_message_type = ['chat', 'welcome', 'error', 'pong', 'force_disconnect'];
 
 const useWebSocket = (url) => {
     const ws = useRef(null);

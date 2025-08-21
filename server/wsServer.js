@@ -9,32 +9,76 @@ const app = express();
 const server = createServer(app);
 const wss = new WebSocketServer({ server });
 
-
-
 // 心跳检测间隔
 const HEARTBEAT_INTERVAL = 10000;
 
 class WebSocketHandler {
     constructor() {
         // 存储所有连接的客户端
-        // key: clientId, value: { ws, isAlive, lastHeartbeat }
+        // key: clientId, value: { ws, isAlive, lastHeartbeat, userId, sessionId }
         this.clients = new Map();
+
+        // 存储用户会话映射 - 新增
+        // key: userId, value: { clientId, sessionId, timestamp }
+        this.userSessions = new Map();
     }
 
     // 处理新连接
     handleConnection(ws, req) {
         const clientId = this.getClientId(req);
+        const userId = this.getUserId(req);
+        const sessionId = this.getSessionId(req);
+
+        console.log(`Client connecting: ${clientId}, User: ${userId}, Session: ${sessionId}`);
+
+        // 检查是否已有该用户的连接 - 新增逻辑
+        if (this.userSessions.has(userId)) {
+            const existingSession = this.userSessions.get(userId);
+            const existingClient = this.clients.get(existingSession.clientId);
+
+
+            // 如果是不同的会话，断开旧连接
+            if (existingSession.sessionId !== sessionId && existingClient) {
+                console.log(`User ${userId} new session ${sessionId}, disconnecting old session ${existingSession.sessionId}`);
+
+                // 通知旧连接被强制断开
+                if (existingClient.ws.readyState === 1) {
+                    existingClient.ws.send(JSON.stringify({
+                        type: 'force_disconnect',
+                        reason: 'new_session_connected',
+                        content: '另一个浏览器已连接，当前连接将断开',
+                        timestamp: Date.now()
+                    }));
+
+                    // 延迟关闭，确保消息发送完成
+                    setTimeout(() => {
+                        // 生效
+                        existingClient.ws.close(1000, 'New session connected');
+                    }, 100);
+                }
+
+                // 清理旧客户端
+                this.clients.delete(existingSession.clientId);
+            }
+        }
 
         // 存储客户端信息
         this.clients.set(clientId, {
             ws,
             isAlive: true,
-            lastHeartbeat: Date.now()
+            lastHeartbeat: Date.now(),
+            userId,
+            sessionId
         });
 
-        console.log(35, this.clients)
+        // 更新用户会话映射 - 新增
+        this.userSessions.set(userId, {
+            clientId,
+            sessionId,
+            timestamp: Date.now()
+        });
 
-        console.log(`Client connected: ${clientId}`);
+        console.log(`Client connected: ${clientId}, User: ${userId}`);
 
         // 设置心跳检测
         this.setupHeartbeat(ws, clientId);
@@ -46,13 +90,25 @@ class WebSocketHandler {
         this.setupCloseHandler(ws, clientId);
 
         // 发送欢迎消息
-        this.sendWelcomeMessage(ws, clientId);
+        this.sendWelcomeMessage(ws, clientId, userId);
     }
 
     // 获取客户端ID
     getClientId(req) {
         const params = new URL(req.url, 'ws://localhost').searchParams;
         return params.get('clientId') || Date.now().toString();
+    }
+
+    // 获取用户ID - 新增
+    getUserId(req) {
+        const params = new URL(req.url, 'ws://localhost').searchParams;
+        return params.get('oa') || 'anonymous';
+    }
+
+    // 获取会话ID - 新增
+    getSessionId(req) {
+        const params = new URL(req.url, 'ws://localhost').searchParams;
+        return params.get('sessionId') || Date.now().toString();
     }
 
     // 设置心跳检测,server发给浏览器的ping-pong
@@ -67,7 +123,7 @@ class WebSocketHandler {
     }
 
     // 设置消息处理
-    setupMessageHandler(ws, clientId = '100') {
+    setupMessageHandler(ws, clientId) {
         ws.on('message', async (message) => {
             try {
                 const data = JSON.parse(message);
@@ -83,6 +139,7 @@ class WebSocketHandler {
     async handleMessage(clientId, data) {
         const client = this.clients.get(clientId);
         if (!client) return;
+
         switch (data.type) {
             case 'chat':
                 await this.handleChatMessage(clientId, data);
@@ -97,49 +154,64 @@ class WebSocketHandler {
 
     // 处理聊天消息
     async handleChatMessage(clientId, data) {
-        console.log(98, clientId, data)
+        const client = this.clients.get(clientId);
+        if (!client) return;
+
+        console.log(`Chat from ${clientId} (User: ${client.userId}):`, data.content);
 
         // 广播消息给其他客户端
         this.broadcast({
             type: 'chat',
             senderId: clientId,
+            userId: client.userId,
             content: data.content,
             timestamp: Date.now()
-        }) // 排除发送者
+        });
 
         // 确认消息已收到
-        const client = this.clients.get(clientId);
-        if (client) {
-            client.ws.send(JSON.stringify({
-                type: 'ack',
-                messageId: data.messageId,
-                timestamp: Date.now()
-            }));
-        }
+        client.ws.send(JSON.stringify({
+            type: 'ack',
+            messageId: data.messageId,
+            timestamp: Date.now()
+        }));
     }
 
     async handleHeartbeat(clientId) {
-        this.broadcast({
+        const client = this.clients.get(clientId);
+        if (!client) return;
+
+        // 回复pong给发送ping的客户端
+        client.ws.send(JSON.stringify({
             type: 'pong',
-            senderId: clientId,
-            content: "我收到了你的ping",
+            content: '我收到了你的ping',
             timestamp: Date.now()
-        });
+        }));
     }
 
     // 设置关闭处理
     setupCloseHandler(ws, clientId) {
         ws.on('close', () => {
             console.log(`Client disconnected: ${clientId}`);
+
+            const client = this.clients.get(clientId);
+            if (client && client.userId) {
+                // 只有当前会话才删除用户会话记录 - 修改
+                const userSession = this.userSessions.get(client.userId);
+                if (userSession && userSession.clientId === clientId) {
+                    this.userSessions.delete(client.userId);
+                    console.log(`User ${client.userId} session ${client.sessionId} disconnected`);
+                }
+            }
+
             this.clients.delete(clientId);
-            // this.broadcastUserList();
         });
     }
+
     // 发送欢迎消息
-    sendWelcomeMessage(ws, clientId) {
+    sendWelcomeMessage(ws, clientId, userId) {
         ws.send(JSON.stringify({
             type: 'welcome',
-            content: `Welcome, client ${clientId}!`,
+            content: `Welcome, ${userId}! (Client: ${clientId})`,
             timestamp: Date.now()
         }));
     }
@@ -170,9 +242,17 @@ class WebSocketHandler {
                     console.log(`Client ${clientId} timed out`);
                     client.ws.terminate();
                     this.clients.delete(clientId);
+
+                    // 清理用户会话映射 - 新增
+                    if (client.userId) {
+                        const userSession = this.userSessions.get(client.userId);
+                        if (userSession && userSession.clientId === clientId) {
+                            this.userSessions.delete(client.userId);
+                        }
+                    }
                     return;
                 }
-                // 先将连接状态标记为false，然后发送ping请求给客户端，等待pong响应来更新isAlive状态
+
                 client.isAlive = false;
                 client.ws.ping();
             });
