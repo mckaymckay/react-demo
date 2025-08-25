@@ -15,6 +15,7 @@ export default function Index() {
             <ul style={{ cursor: 'pointer' }}>
                 <li onClick={() => handleClick('/demo')}>demo</li>
                 <li onClick={() => handleClick('/chat')}>chat</li>
+                <li onClick={() => handleClick('/fabu')}>fabu</li>
             </ul>
 
         </div>

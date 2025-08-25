@@ -80,7 +80,11 @@ const useWebSocket = (url) => {
                 }
 
                 if (Valid_message_type.includes(content.type)) {
-                    messageNotification()
+
+                    setTimeout(() => {
+                        messageNotification()
+                    }, 3000)
+
                     setMessages((prev) => [...prev, content]);
                 }
             } catch (err) {
