@@ -13,7 +13,7 @@ instance.interceptors.response.use(
             return response.data
         }
 
-        return response
+        return response.data
     },
     error => {
         message.error('接口报错')

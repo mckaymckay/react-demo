@@ -19,7 +19,7 @@ export default function Albums() {
         <div>
             <p>Albums:</p>
 
-            {albums.length > 0
+            {albums?.length > 0
                 ?
                 <ul>
                     {
