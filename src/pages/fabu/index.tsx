@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react'
 import loadBMapPromise from './loadBMap'
 import LazyImage from './LazyImage'
-import PreloadConfig from './PreloadConfig'
+import PreloadImage from './PreLoadImage'
+import PreloadConfig from './preloadForm'
 import BeforeLeave from './BeforeLeave'
 
 export default function Index() {
@@ -24,10 +25,17 @@ export default function Index() {
         <div>
             <h2>发布房源页面</h2>
 
+            {/* 关闭页面前提醒保存 */}
             <BeforeLeave />
-            <PreloadConfig />
-            <LazyImage />
 
+            {/* 懒加载+虚拟滚动渲染多图片表格 */}
+            {/* <LazyImage /> */}
+            {/* 可视区域检测+只能 */}
+            {/* <PreloadImage /> */}
+
+
+            {/* 长表单渲染 */}
+            <PreloadConfig />
 
         </div>
     )

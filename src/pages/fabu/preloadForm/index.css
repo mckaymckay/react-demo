@@ -1,0 +1,87 @@
+/* components/LongForm.css */
+.long-form-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+}
+
+.form-section {
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.form-section .ant-card-head {
+  background-color: #fafafa;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.form-section .ant-card-head-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.form-actions {
+  background: white;
+  padding: 16px 24px;
+  border-top: 1px solid #e8e8e8;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.ant-form-item-label > label {
+  font-weight: 500;
+  color: #262626;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .long-form-container {
+    padding: 16px;
+  }
+  
+  .form-actions {
+    padding: 12px 16px;
+  }
+  
+  .form-actions .ant-btn {
+    flex: 1;
+  }
+}
+
+/* 表单项间距优化 */
+.ant-form-item {
+  margin-bottom: 20px;
+}
+
+.ant-card-body {
+  padding: 24px;
+}
+
+/* 输入框样式优化 */
+.ant-input,
+.ant-select-selector,
+.ant-picker,
+.ant-input-number {
+  border-radius: 6px;
+}
+
+.ant-input:focus,
+.ant-select-focused .ant-select-selector,
+.ant-picker-focused,
+.ant-input-number-focused {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}

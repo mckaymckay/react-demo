@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import compression from "compression";
-import { taskList, imageList } from './data.js'
+import { taskList, imageList, formConfig, formDetail } from './data.js'
 
 
 const PORT = 3002;
@@ -28,6 +28,22 @@ app.get('/fetchImageList', (req, res) => {
     res.json({
         code: 0,
         data: imageList,
+        msg: 'success'
+    })
+})
+
+app.get('/fetchFormConfig', (req, res) => {
+    res.json({
+        code: 0,
+        data: formConfig,
+        mas: 'success'
+    })
+})
+
+app.get('/fetchFormDetail', (_, res) => {
+    res.json({
+        code: 0,
+        data: formDetail,
         msg: 'success'
     })
 })

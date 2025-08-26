@@ -11,25 +11,25 @@ const LazyImage = ({ src, alt, width = 80, height = 80 }) => {
 
 
     //  Intersection Observer 的回调函数
-    const handleIntersectionObserver = useCallback((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                setInView(true)
-            }
-        })
-    }, [])
+    // const handleIntersectionObserver = useCallback((entries) => {
+    //     entries.forEach(entry => {
+    //         if (entry.isIntersecting) {
+    //             setInView(true)
+    //         }
+    //     })
+    // }, [])
 
-    useEffect(() => {
-        if ('IntersectionObserver' in window) {
-            const observer = new IntersectionObserver(handleIntersectionObserver, {
-                threshold: 0.1
-            })
-            if (imgRef.current) observer.observe(imgRef.current)
-            return () => observer.disconnect()
-        } else {
-            setInView(true)
-        }
-    }, [])
+    // useEffect(() => {
+    //     if ('IntersectionObserver' in window) {
+    //         const observer = new IntersectionObserver(handleIntersectionObserver, {
+    //             threshold: 0.1
+    //         })
+    //         if (imgRef.current) observer.observe(imgRef.current)
+    //         return () => observer.disconnect()
+    //     } else {
+    //         setInView(true)
+    //     }
+    // }, [])
 
 
     return (
@@ -106,7 +106,7 @@ const DataTable = () => {
             <h2>懒加载图片+虚拟滚动</h2>
 
             <Table
-                virtual
+                // virtual
                 dataSource={imageList}
                 columns={columns}
                 scroll={{ y: 400 }} // 启用虚拟滚动
