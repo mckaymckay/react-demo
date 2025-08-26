@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react'
 import loadBMapPromise from './loadBMap'
 import LazyImage from './LazyImage'
+import PreloadConfig from './PreloadConfig'
+import BeforeLeave from './BeforeLeave'
 
 export default function Index() {
 
@@ -20,10 +22,13 @@ export default function Index() {
     }
     return (
         <div>
-            <h2>发布</h2>
+            <h2>发布房源页面</h2>
+
+            <BeforeLeave />
+            <PreloadConfig />
             <LazyImage />
 
-            <h3>处理接口</h3>
+
         </div>
     )
 }

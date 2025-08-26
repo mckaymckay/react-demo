@@ -6,7 +6,7 @@ import { getImageListApi } from '../../service/api'
 // 懒加载图片组件
 const LazyImage = ({ src, alt, width = 80, height = 80 }) => {
     const [loaded, setLoaded] = useState(false);
-    const [inView, setInView] = useState(false);
+    const [inView, setInView] = useState(true);
     const imgRef = useRef(null);
 
 
@@ -92,15 +92,25 @@ const DataTable = () => {
         // 其他列...
     ];
 
+    useEffect(() => {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'image';
+        link.href = 'src/assets/img5.jpeg'
+        document.head.appendChild(link);
+    }, [])
+
+
     return (
         <div>
             <h2>懒加载图片+虚拟滚动</h2>
 
             <Table
+                virtual
                 dataSource={imageList}
                 columns={columns}
                 scroll={{ y: 400 }} // 启用虚拟滚动
-                pagination={{ pageSize: 10 }} // 分页减少同时渲染的数据
+                pagination={{ pageSize: 100 }} // 分页减少同时渲染的数据
             />
         </div>
 
