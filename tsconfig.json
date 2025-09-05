@@ -1,5 +1,7 @@
 {
     "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
         "moduleResolution": "node",
         "jsx": "react",
         "target": "es2015",
