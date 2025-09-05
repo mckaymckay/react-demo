@@ -5,6 +5,7 @@ import Chat from '../pages/chat';
 import Fabu from '../pages/fabu';
 import Test from '../pages/testFilder/index.tsx';
 import DebounceInput from '../pages/debounceInput';
+import CanvasTwo from '../pages/canvasTwo';
 
 const Routes = [
   {
@@ -31,6 +32,10 @@ const Routes = [
   {
     path: 'debounceInput',
     element: <DebounceInput />,
+  },
+  {
+    path: 'canvasTwo',
+    element: <CanvasTwo />,
   },
   {
     path: 'test',
